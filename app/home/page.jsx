@@ -1,50 +1,52 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
+import styles from "./Home.module.css";
 import CharacterCard from "../../components/CharacterCard";
-import styles from "./home.module.css";
 
-
-export default function Home(){
+export default function Home() {
     const [search, setSearch] = useState("");
-    const [notFound, setNotFound] = useState(false);
     const [characters, setCharacters] = useState([]);
+    const [notFound, setNotFound] = useState(false);
+    const [page, setPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(1);
 
     
-    const fetchCharacters = async (name = "") => {
+        const fetchCharacters = async (name, pageNumber) => {
             try {
-                const { data } = await axios.get(`http://rickandmortyapi.com/api/character/?name=${name}`);
+                const { data } = await axios.get(`https://rickandmortyapi.com/api/character/?page=${pageNumber}&name=${name}`);
                 setCharacters(data.results);
-            } catch (error) {
-            console.error('Erro ao buscar personagens:', error);
-            setNotFound(true);
-            setCharacters([]);
+                setTotalPages(data.info.pages);
+                setNotFound(false);
+            } catch {
+                setNotFound(true);
+                setCharacters([]);
             }
-        };  
+        };
 
-    useEffect(() => {
-        fetchCharacters();  
-}, []);
+        useEffect(() => {
+            fetchCharacters(search.trim(), page);
+        }, [page]);
 
-    const handleCardClick = (name) => {
-        toast.info(`Você clicou no personagem: ${name}`, {
-        });
-    }
+        const handleCardClick = (name) => {
+            toast.info(`Você clicou no personagem: ${name}`, {});
+        };
 
-    const handleResetClick = (message) => {
-        toast.info(message, {});
-    }
+        const handleResetClick = (message) => {
+            toast.info(message, {});
+        }
+    
+        const handleSearchClick = (message) => {
+            toast.info(message, {
+            });
+        }
+    
 
-    const handleSearchClick = (message) => {
-        toast.info(message, {
-        });
-    }
-
-console.log(characters);
+    console.log(characters);
 
     return(
         <div className={styles.container}>
@@ -66,9 +68,22 @@ console.log(characters);
             <button
             onClick={() => {
                 setSearch("");
-                fetchCharacters();
+                fetchCharacters("", 1);
                 handleResetClick("You reset the search")}}
             className={styles.buttonReset} >Reset</button>
+            </div>
+
+            <div className={styles.navControls}>
+                <button
+                onClick={() => setPage((p) => Math.max(p - 1,1))}
+                disabled={page === 1}
+                className={styles.buttonNav}
+                >Previous</button>
+                <button
+                onClick={() => setPage((p) => Math.min(p + 1, totalPages))}
+                disabled={page === totalPages}
+                className={styles.buttonNav}
+                >Next</button>
             </div>
 
             {notFound && (
@@ -82,5 +97,5 @@ console.log(characters);
             </div>
            
         </div>
-       );
+   );
 }
