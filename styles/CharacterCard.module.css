@@ -12,11 +12,16 @@
 }
 
 .avatar {
-    width: 125px;
     border-radius: 50%;
 }
 
 .title {
     margin: 10px 0 5px;
     font-size: 20px;
+}
+
+@media (max-width: 768px) {
+    .card {
+        width: 90%;
+    }
 }
